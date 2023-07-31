@@ -6,6 +6,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver} from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { ChatCompletionRequestMessage } from "openai";
+import { useState } from "react";
+import axios from "axios";
+import { cn } from "@/lib/utils";
 
 import Heading from "@/components/heading";
 import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
@@ -13,8 +16,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import { formSchema } from "./constants";
-import { useState } from "react";
-import axios from "axios";
+import { Empty } from "@/components/empty";
+import { Loader } from "@/components/loader";
+import { UserAvatar } from "@/components/user-avatar";
+import { BotAvatar } from "@/components/bot-avatar";
 
 const ConversationPage = () => {
     const router = useRouter();
@@ -88,10 +93,22 @@ const ConversationPage = () => {
                     </Form>
                 </div>
                 <div className="space-y-4 mt-4">
+                    {isLoading && (
+                        <div className="p-8 rounded-lg w-full flex items-center justify-center bg-muted">
+                            <Loader />
+                        </div>
+                    )}
+                    {messages.length === 0 && !isLoading && (<Empty label="No Conversation started." />)} 
                     <div className="flex flex-col-reverse gap-y-4">
                         {
                             messages.map(message=>(
-                                <div key={message.content}>{message.content}</div>
+                                <div 
+                                    key={message.content}
+                                    className={cn("p-8 w-full items-start gap-x-8 rounded-lg", message.role === "user" ? "bg-white border border-black/10" : "bg-muted" )}
+                                >   
+                                    {message.role  === "user" ? <UserAvatar /> : <BotAvatar />}
+                                    {message.content}
+                                </div>
                             ))
                         }
                     </div>
